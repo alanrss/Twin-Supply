@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cart | TWIN-SUPPLY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">TWIN-SUPPLY</div>
+    <nav class="nav">
+      <a href="shop.html">Shop</a>
+    </nav>
+  </header>
+
+  <section class="cart-page">
+    <h1>Your Cart</h1>
+
+    <div id="cart-items"></div>
+
+    <div class="cart-summary">
+      <h3>Total: <span id="cart-total">$0.00</span></h3>
+     <button class="btn-primary" onclick="checkout()">Proceed to Checkout</button>
+
+    </div>
+  </section>
+
+ <footer class="footer">
+  <a href="shipping.html">Shipping</a>
+  <a href="returns.html">Returns</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="terms.html">Terms</a>
+  <p>© 2026 TWIN-SUPPLY. All rights reserved.</p>
+</footer>
+
+
+  <script src="js/cart.js"></script>
+</body>
+</html>
