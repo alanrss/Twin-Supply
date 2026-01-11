@@ -1,28 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Shop | Twin-Supply</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/styles.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Shop — Twin-Supply</title>
+  <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
+      <div class="navlinks">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="shop.html?view=favorites">Favorites</a>
+        <a href="cart.html">Cart</a>
+      </div>
+      <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
+    </div>
+  </div>
 
-  <!-- CONTENIDO SHOP -->
-  <main>
-    <section class="shop">
-      <div id="products-container" class="products-grid"></div>
+  <main class="wrap">
+    <section class="panel">
+      <div class="stripe"></div>
+      <div class="panelInner">
+        <div class="kicker">Shop</div>
+        <div class="h1" id="shop-title">Todos los productos</div>
+        <p class="sub">Vista plantilla: secciones horizontales por categoría. Si filtras (category/gender/favorites) se muestra en grid.</p>
+
+        <!-- Nota visual (pedida) -->
+        <div class="heroNote">
+          <b>Nota visual</b>
+          <p>Glow pastel + cards premium. Guardar (🔖) y Like (♥) funcionan y quedan guardados en tu navegador.</p>
+        </div>
+      </div>
     </section>
+
+    <!-- Default: sections -->
+    <div id="shop-sections"></div>
+
+    <!-- Filter view -->
+    <div id="shop-grid" class="grid" style="margin-top:16px;display:none"></div>
+
+    <footer>
+      <span>© Twin-Supply</span>
+      <span>Shop</span>
+    </footer>
   </main>
 
-  <!-- SCRIPTS (ORDEN IMPORTANTE) -->
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
+  <script src="js/social.js"></script>
   <script src="js/shop.js"></script>
-
 </body>
 </html>
-
-

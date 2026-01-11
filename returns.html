@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <title>Returns & Refunds | TWIN-SUPPLY</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-<nav class="navbar">
-  <a href="index.html" class="logo">TWIN-SUPPLY</a>
-</nav>
+<header class="site-header">
+  <a href="index.html" class="logo">Twin-Supply</a>
+
+  <nav>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="cart.html">
+      Cart (<span id="cart-count">0</span>)
+    </a>
+  </nav>
+</header>
 
 <section class="policy">
   <h1>Returns & Refunds</h1>
@@ -33,16 +43,15 @@
     has been inspected and approved.
   </p>
 </section>
-<footer class="footer">
-  <div class="footer-links">
-    <a href="shipping.html">Shipping</a>
-    <a href="returns.html">Returns</a>
-    <a href="privacy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
-  </div>
 
+<footer class="footer">
+  <a href="shipping.html">Shipping</a>
+  <a href="returns.html">Returns</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="terms.html">Terms</a>
   <p>© 2026 TWIN-SUPPLY. All rights reserved.</p>
 </footer>
 
+<script src="js/cart.js"></script>
 </body>
 </html>

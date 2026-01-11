@@ -1,48 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Product | Twin-Supply</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/styles.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Product — Twin-Supply</title>
+  <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
+      <div class="navlinks">
+        <a href="shop.html">Shop</a>
+        <a href="shop.html?view=favorites">Favorites</a>
+        <a href="cart.html">Cart</a>
+      </div>
+      <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
+    </div>
+  </div>
 
-  <!-- PRODUCT PAGE -->
-  <main>
-    <section class="product-page">
-
-      <div class="product-image">
-        <img id="product-image" src="" alt="">
+  <main class="wrap">
+    <section class="productWrap">
+      <div class="productMedia">
+        <img id="p-image" src="" alt="product">
       </div>
 
-      <div class="product-info">
-        <h1 id="product-name"></h1>
-        <p class="product-category" id="product-category"></p>
-        <p class="product-price" id="product-price"></p>
+      <div class="panel">
+        <div class="productInfo">
+          <div class="kicker">Product</div>
+          <h1 id="p-title" class="productTitle"></h1>
+          <div id="p-meta" class="productMeta"></div>
+          <div id="p-price" style="margin-top:10px;font-weight:950;font-size:22px;color:rgba(154,230,255,.95)"></div>
+          <p id="p-desc" class="productDesc"></p>
 
-        <p class="product-description" id="product-description"></p>
+          <div class="productBtns">
+            <div class="qty">
+              <button id="p-minus">-</button>
+              <input id="p-qty" type="number" min="1" value="1"/>
+              <button id="p-plus">+</button>
+            </div>
 
-        <p class="authentic">
-          ✔ 100% Authentic<br>
-          ✔ Sourced from authorized distributors
-        </p>
+            <button id="p-add" class="btn btnPrimary">Add to Cart</button>
 
-        <button class="btn-primary" id="add-to-cart-btn">
-          Add to Cart
-        </button>
+            <button id="p-save" class="iconBtn" title="Guardar">🔖</button>
+
+            <button id="p-like" class="iconBtn" title="Like">♥</button>
+            <span style="color:var(--muted);font-weight:900">Likes: <b id="p-likecount">0</b></span>
+          </div>
+        </div>
       </div>
-
     </section>
+
+    <!-- Sugerencias -->
+    <section class="section">
+      <div class="sectionHead">
+        <h2>Sugerencias</h2>
+        <span>Automático por categoría / género</span>
+      </div>
+      <div class="hr"></div>
+      <div id="suggestions" class="grid"></div>
+    </section>
+
+    <!-- Comentarios -->
+    <section class="section">
+      <div class="sectionHead">
+        <h2>Comentarios</h2>
+        <span>Guardado en tu navegador</span>
+      </div>
+      <div class="hr"></div>
+
+      <div class="commentBox">
+        <div class="inlineRow">
+          <div style="flex:1">
+            <label>Nombre</label>
+            <input id="c-name" placeholder="Tu nombre"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Comentario</label>
+          <textarea id="c-text" placeholder="Escribe tu comentario..."></textarea>
+        </div>
+        <div style="margin-top:10px">
+          <button id="c-add" class="btn btnPrimary">Publicar</button>
+        </div>
+      </div>
+
+      <div id="comments-list"></div>
+    </section>
+
+    <footer>
+      <span>© Twin-Supply</span>
+      <span>Product</span>
+    </footer>
   </main>
 
-  <!-- SCRIPTS (ORDEN IMPORTANTE) -->
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
+  <script src="js/social.js"></script>
   <script src="js/product.js"></script>
-
 </body>
 </html>
-
