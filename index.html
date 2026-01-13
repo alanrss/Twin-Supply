@@ -1,71 +1,93 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Twin-Supply</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
   <div class="topbar">
     <div class="wrap nav">
       <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
+
       <div class="navlinks">
-        <a href="index.html">Home</a>
+        <a href="index.html" class="active">Home</a>
         <a href="shop.html">Shop</a>
-        <a href="shop.html?view=favorites">Favorites</a>
         <a href="cart.html">Cart</a>
         <a href="about.html">About</a>
         <a href="contact.html">Contact</a>
       </div>
+
       <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
     </div>
   </div>
 
   <main class="wrap">
-    <!-- Mantengo tu inicio: Presence is Everything + Shop Now -->
-    <section class="panel">
-      <div class="stripe"></div>
-      <div class="panelInner">
-        <div class="kicker">Presence is Everything</div>
-        <div class="h1">Dark store,<br/>soft glow.</div>
-        <p class="sub">Tu home queda igual en mensaje principal + botón. Lo nuevo empieza debajo.</p>
-        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-          <a class="btn btnPrimary" href="shop.html">Shop Now</a>
-          <a class="btn btnGhost" href="shop.html?view=favorites">Ver Favorites</a>
-        </div>
-
-        <!-- Nota visual (como pediste) -->
-        <div class="heroNote">
-          <b>Nota visual</b>
-          <p>Cards suaves, glow pastel, blur premium. Tus productos se ven “tienda real”.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Debajo del Shop Now: Best Sellers (automático desde Admin) -->
-    <section class="section">
-      <div class="sectionHead">
-        <h2>Best Sellers / Top Products</h2>
-        <span>Automático desde Admin (Best Seller / Featured)</span>
+    <!-- SECTION 1: SHOP (All products) -->
+    <section class="section reveal">
+      <div class="sectionHeadRow">
+        <h2>Shop</h2>
+        <div class="muted">All products · Fast checkout · Secure PayPal</div>
       </div>
       <div class="hr"></div>
-      <div id="best-grid" class="grid"></div>
+      <div id="home-grid" class="grid" style="margin-top:14px"></div>
     </section>
 
-    <!-- Secciones por categoría (ya no fragrance/apparel fijo) -->
-    <div id="category-rows"></div>
+    <!-- SECTION 2: PERFUMES / CLOTHING -->
+    <section class="section reveal">
+      <div class="sectionHeadRow">
+        <h2>Browse</h2>
+        <div class="muted">Jump straight into Perfumes or Clothing</div>
+      </div>
+      <div class="hr"></div>
+
+      <div class="categoryGrid">
+        <div class="catCard" data-dept="Perfumes">
+          <div class="catTitle">Perfumes</div>
+          <div class="catDesc">Fragrances, colognes, oils, and more.</div>
+          <div class="catActions">
+            <div class="seg" aria-label="Perfumes gender filter">
+              <button type="button" data-gender="All" class="active">All</button>
+              <button type="button" data-gender="Men">Men</button>
+              <button type="button" data-gender="Women">Women</button>
+            </div>
+            <span class="pillTag">Tap to open</span>
+          </div>
+        </div>
+
+        <div class="catCard" data-dept="Clothing">
+          <div class="catTitle">Clothing</div>
+          <div class="catDesc">Streetwear, sneakers, and essentials.</div>
+          <div class="catActions">
+            <div class="seg" aria-label="Clothing gender filter">
+              <button type="button" data-gender="All" class="active">All</button>
+              <button type="button" data-gender="Men">Men</button>
+              <button type="button" data-gender="Women">Women</button>
+            </div>
+            <span class="pillTag">Tap to open</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <footer>
       <span>© Twin-Supply</span>
-      <span>Dark Store · Soft Glow</span>
+      <span>
+        <a href="terms.html">Terms</a> ·
+        <a href="privacy.html">Privacy</a> ·
+        <a href="shipping.html">Shipping</a> ·
+        <a href="returns.html">Returns</a>
+      </span>
     </footer>
   </main>
 
-  <!-- Scripts (orden IMPORTANTE) -->
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
-  <script src="js/social.js"></script>
   <script src="js/home.js"></script>
 </body>
 </html>

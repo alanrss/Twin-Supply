@@ -1,9 +1,9 @@
 :root{
-  --bg:#0b1020;
-  --bg2:#0a0f1e;
-  --surface: rgba(255,255,255,.06);
-  --surface2: rgba(255,255,255,.08);
-  --border: rgba(255,255,255,.12);
+  --bg:#0f162a;
+  --bg2:#0b1224;
+  --surface: rgba(255,255,255,.08);
+  --surface2: rgba(255,255,255,.10);
+  --border: rgba(255,255,255,.14);
   --text:#edf1ff;
   --muted: rgba(237,241,255,.68);
 
@@ -396,4 +396,117 @@ footer{
   margin:22px 0 10px;
   color:var(--muted);
   display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+
+
+/* ===== Motion & page transitions ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pageFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+body { animation: pageFade .18s ease-out; }
+body.pageExit { opacity: 0; transform: translateY(-6px); transition: opacity .18s ease, transform .18s ease; }
+
+.reveal { animation: fadeUp .22s ease-out both; }
+
+.sectionHeadRow{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.sectionHeadRow h2{ margin:0; }
+.sectionHeadRow .muted{ color:var(--muted); font-weight:750; font-size:13px; }
+
+/* ===== Home category tiles ===== */
+.categoryGrid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap:14px;
+  margin-top:14px;
+}
+@media (max-width: 760px){
+  .categoryGrid{ grid-template-columns: 1fr; }
+}
+.catCard{
+  border:1px solid var(--border);
+  background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  box-shadow: var(--shadowSoft);
+  border-radius: 18px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  position: relative;
+  overflow:hidden;
+}
+.catCard:hover{ transform: translateY(-2px); box-shadow: var(--shadow); border-color: rgba(154,230,255,.28); }
+.catCard:active{ transform: translateY(0); }
+.catCard .catTitle{ font-size:18px; font-weight:950; letter-spacing:.2px; }
+.catCard .catDesc{ color:var(--muted); margin-top:6px; font-weight:750; font-size:13px; }
+.catCard .catActions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+
+.seg{
+  display:inline-flex; gap:6px; flex-wrap:wrap;
+  border:1px solid var(--border);
+  background: rgba(0,0,0,.12);
+  padding:6px;
+  border-radius: 999px;
+}
+.seg button{
+  border:0;
+  background: transparent;
+  color: var(--muted);
+  font-weight:900;
+  padding:8px 12px;
+  border-radius: 999px;
+  cursor:pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.seg button.active{
+  background: rgba(255,255,255,.10);
+  color: var(--text);
+}
+
+/* ===== Shop filter bar ===== */
+.filterBar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  margin-top:14px;
+}
+.filterGroup{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.filterLabel{ color:var(--muted); font-weight:900; font-size:13px; }
+
+.notice{
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.06);
+  padding:12px;
+  border-radius: 14px;
+  color: var(--muted);
+  font-weight:750;
+}
+
+/* ===== Admin highlight after save ===== */
+.flash{
+  outline: 2px solid rgba(154,230,255,.55);
+  box-shadow: 0 0 0 6px rgba(154,230,255,.12);
+  border-radius: 14px;
+  animation: flashOut .9s ease-out forwards;
+}
+@keyframes flashOut{
+  from { box-shadow: 0 0 0 8px rgba(154,230,255,.18); }
+  to { box-shadow: 0 0 0 0 rgba(154,230,255,0); }
+}
+/* ===== Checkout summary layout fix ===== */
+#summary-list .listItem{
+  grid-template-columns: 1fr auto; /* en checkout queremos 2 columnas */
+  align-items: center;
+}
+
+#summary-list .listItem > div:first-child{
+  min-width: 0; /* permite que el nombre se ajuste sin empujar el precio */
+}
+
+#summary-list .listItem > div:last-child{
+  white-space: nowrap; /* el precio no se parte ni se monta */
+  padding-left: 12px;
 }

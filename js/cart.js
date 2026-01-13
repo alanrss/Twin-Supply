@@ -1,5 +1,5 @@
 /* cart.js
-   - Carrito en localStorage("cart")
+   - Cart en localStorage("cart")
    - Contador global #cart-count
    - Stepper qty
    - Limpieza automática de ítems inexistentes
@@ -95,10 +95,10 @@ function renderCart() {
 
   if (cart.length === 0) {
     listEl.innerHTML = `<div class="panel"><div class="panelInner">
-      <div class="kicker">Carrito</div>
-      <div class="h1" style="margin:10px 0 0">Tu carrito está vacío</div>
-      <p class="sub">Agrega productos desde el shop.</p>
-      <div style="margin-top:14px"><a class="btn btnPrimary" href="shop.html">Ir al shop</a></div>
+      <div class="kicker">Cart</div>
+      <div class="h1" style="margin:10px 0 0">Your cart is empty</div>
+      <p class="sub">Add products from the shop.</p>
+      <div style="margin-top:14px"><a class="btn btnPrimary" href="shop.html">Go to Shop</a></div>
     </div></div>`;
     totalEl.textContent = formatMoney(0);
     return;
@@ -127,7 +127,7 @@ function renderCart() {
           <input class="qty-input" type="number" min="1" value="${Number(item.qty)}">
           <button class="qty-plus" aria-label="más">+</button>
         </div>
-        <button class="btn btnDanger remove-btn" style="padding:10px 12px;border-radius:14px">Eliminar</button>
+        <button class="btn btnDanger remove-btn" style="padding:10px 12px;border-radius:14px">Remove</button>
       </div>
     `;
 

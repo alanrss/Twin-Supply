@@ -1,9 +1,13 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Product — Twin-Supply</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
@@ -11,16 +15,18 @@
     <div class="wrap nav">
       <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
       <div class="navlinks">
+        <a href="index.html">Home</a>
         <a href="shop.html">Shop</a>
-        <a href="shop.html?view=favorites">Favorites</a>
         <a href="cart.html">Cart</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
       </div>
       <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
     </div>
   </div>
 
   <main class="wrap">
-    <section class="productWrap">
+    <section class="productWrap reveal">
       <div class="productMedia">
         <img id="p-image" src="" alt="product">
       </div>
@@ -35,57 +41,25 @@
 
           <div class="productBtns">
             <div class="qty">
-              <button id="p-minus">-</button>
-              <input id="p-qty" type="number" min="1" value="1"/>
-              <button id="p-plus">+</button>
+              <button id="qty-minus" type="button">−</button>
+              <input id="qty-input" type="number" min="1" value="1"/>
+              <button id="qty-plus" type="button">+</button>
             </div>
-
-            <button id="p-add" class="btn btnPrimary">Add to Cart</button>
-
-            <button id="p-save" class="iconBtn" title="Guardar">🔖</button>
-
-            <button id="p-like" class="iconBtn" title="Like">♥</button>
-            <span style="color:var(--muted);font-weight:900">Likes: <b id="p-likecount">0</b></span>
+            <button id="add-btn" class="btn btnPrimary" type="button">Add to Cart</button>
           </div>
+          <div id="p-stock" class="productStock"></div>
         </div>
       </div>
     </section>
 
-    <!-- Sugerencias -->
-    <section class="section">
-      <div class="sectionHead">
-        <h2>Sugerencias</h2>
-        <span>Automático por categoría / género</span>
+    <!-- Suggestions -->
+    <section class="section reveal">
+      <div class="sectionHeadRow">
+        <h2>You may also like</h2>
+        <div class="muted">Picked from the same department / category</div>
       </div>
       <div class="hr"></div>
       <div id="suggestions" class="grid"></div>
-    </section>
-
-    <!-- Comentarios -->
-    <section class="section">
-      <div class="sectionHead">
-        <h2>Comentarios</h2>
-        <span>Guardado en tu navegador</span>
-      </div>
-      <div class="hr"></div>
-
-      <div class="commentBox">
-        <div class="inlineRow">
-          <div style="flex:1">
-            <label>Nombre</label>
-            <input id="c-name" placeholder="Tu nombre"/>
-          </div>
-        </div>
-        <div class="field">
-          <label>Comentario</label>
-          <textarea id="c-text" placeholder="Escribe tu comentario..."></textarea>
-        </div>
-        <div style="margin-top:10px">
-          <button id="c-add" class="btn btnPrimary">Publicar</button>
-        </div>
-      </div>
-
-      <div id="comments-list"></div>
     </section>
 
     <footer>
@@ -96,7 +70,6 @@
 
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
-  <script src="js/social.js"></script>
   <script src="js/product.js"></script>
 </body>
 </html>

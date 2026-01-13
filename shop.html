@@ -1,9 +1,13 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Shop — Twin-Supply</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
@@ -12,35 +16,46 @@
       <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
       <div class="navlinks">
         <a href="index.html">Home</a>
-        <a href="shop.html">Shop</a>
-        <a href="shop.html?view=favorites">Favorites</a>
+        <a href="shop.html" class="active">Shop</a>
         <a href="cart.html">Cart</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
       </div>
       <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
     </div>
   </div>
 
   <main class="wrap">
-    <section class="panel">
-      <div class="stripe"></div>
-      <div class="panelInner">
-        <div class="kicker">Shop</div>
-        <div class="h1" id="shop-title">Todos los productos</div>
-        <p class="sub">Vista plantilla: secciones horizontales por categoría. Si filtras (category/gender/favorites) se muestra en grid.</p>
+    <section class="section reveal">
+      <div class="sectionHeadRow">
+        <h2>Shop</h2>
+        <div class="muted" id="shop-subtitle">All products</div>
+      </div>
+      <div class="hr"></div>
 
-        <!-- Nota visual (pedida) -->
-        <div class="heroNote">
-          <b>Nota visual</b>
-          <p>Glow pastel + cards premium. Guardar (🔖) y Like (♥) funcionan y quedan guardados en tu navegador.</p>
+      <div class="filterBar">
+        <div class="filterGroup">
+          <span class="filterLabel">Department</span>
+          <div class="seg" id="dept-seg">
+            <button type="button" data-dept="All" class="active">All</button>
+            <button type="button" data-dept="Perfumes">Perfumes</button>
+            <button type="button" data-dept="Clothing">Clothing</button>
+          </div>
+        </div>
+
+        <div class="filterGroup">
+          <span class="filterLabel">Gender</span>
+          <div class="seg" id="gender-seg">
+            <button type="button" data-gender="All" class="active">All</button>
+            <button type="button" data-gender="Men">Men</button>
+            <button type="button" data-gender="Women">Women</button>
+          </div>
         </div>
       </div>
+
+      <div id="shop-notice" class="notice" style="display:none;margin-top:14px"></div>
+      <div id="shop-grid" class="grid" style="margin-top:14px"></div>
     </section>
-
-    <!-- Default: sections -->
-    <div id="shop-sections"></div>
-
-    <!-- Filter view -->
-    <div id="shop-grid" class="grid" style="margin-top:16px;display:none"></div>
 
     <footer>
       <span>© Twin-Supply</span>
@@ -50,7 +65,6 @@
 
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
-  <script src="js/social.js"></script>
   <script src="js/shop.js"></script>
 </body>
 </html>

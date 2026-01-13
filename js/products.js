@@ -1,6 +1,6 @@
 /* products.js
    - Fuente única de productos: localStorage("products") con fallback a baseProducts
-   - Incluye nuevos campos: featured, bestseller
+   - Includes: department, featured, bestseller
 */
 
 const PRODUCTS_KEY = "products";
@@ -47,7 +47,7 @@ const baseProducts = [
     name: "Sneakers Drop",
     price: 120,
     image: "assets/placeholder.jpg",
-    gender: "Hombre",
+    gender: "Men",
     category: "Sneakers",
     stock: 8,
     description: "Edición limitada · Stock bajo",
@@ -56,13 +56,36 @@ const baseProducts = [
   }
 ];
 
+function normalizeGender(g) {
+  const v = String(g || "").trim().toLowerCase();
+  if (["men","man","male","hombre","hombres","m","mens"].includes(v)) return "Men";
+  if (["women","woman","female","mujer","mujeres","w","womens"].includes(v)) return "Women";
+  if (["unisex","all","todos","todas"].includes(v)) return "Unisex";
+  // if unknown, keep original but Title Case
+  const raw = String(g || "Unisex").trim();
+  if (!raw) return "Unisex";
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
+function guessDepartment(p) {
+  const dept = String(p.department || "").trim();
+  if (dept) return dept;
+  const cat = String(p.category || "").toLowerCase();
+  const name = String(p.name || "").toLowerCase();
+  const hay = (cat + " " + name);
+  const perfumeHints = ["perfume","fragrance","cologne","parfum","eau de","attar","oud","spray"];
+  const isPerfume = perfumeHints.some((h) => hay.includes(h));
+  return isPerfume ? "Perfumes" : "Clothing";
+}
+
 function normalizeProduct(p) {
   return {
     id: Number(p.id),
     name: String(p.name || "").trim(),
     price: Number(p.price || 0),
     image: String(p.image || "assets/placeholder.jpg"),
-    gender: String(p.gender || "Unisex"),
+    department: String(guessDepartment(p) || "Clothing"),
+    gender: normalizeGender(p.gender || "Unisex"),
     category: String(p.category || "General"),
     stock: Number(p.stock ?? 0),
     description: String(p.description || ""),

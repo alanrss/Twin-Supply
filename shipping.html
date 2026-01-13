@@ -1,30 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Shipping Policy | TWIN-SUPPLY</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/styles.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Shipping — Twin-Supply</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
+      <div class="navlinks">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="cart.html">Cart</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
+    </div>
+  </div>
 
-<header class="site-header">
-  <a href="index.html" class="logo">Twin-Supply</a>
-
-  <nav>
-    <a href="shop.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="cart.html">
-      Cart (<span id="cart-count">0</span>)
-    </a>
-  </nav>
-</header>
-
-<section class="policy">
-  <h1>Shipping Policy</h1>
-
-  <p>
+  <main class="wrap">
+    <section class="panel reveal">
+      <div class="panelInner">
+        <div class="kicker">Shipping</div>
+        <div class="h1" style="margin-top:8px">Shipping policy</div>
+        <div class="hr" style="margin:14px 0"></div>
+        <p>
     Twin-Supply ships orders within the United States.
   </p>
 
@@ -42,16 +49,20 @@
     We are not responsible for delays caused by carriers or
     incorrect shipping information provided by the customer.
   </p>
-</section>
+      </div>
+    </section>
 
-<footer class="footer">
-  <a href="shipping.html">Shipping</a>
-  <a href="returns.html">Returns</a>
-  <a href="privacy.html">Privacy</a>
-  <a href="terms.html">Terms</a>
-  <p>© 2026 TWIN-SUPPLY. All rights reserved.</p>
-</footer>
+    <footer>
+      <span>© Twin-Supply</span>
+      <span>
+        <a href="shipping.html">Shipping</a> ·
+        <a href="returns.html">Returns</a> ·
+        <a href="privacy.html">Privacy</a> ·
+        <a href="terms.html">Terms</a>
+      </span>
+    </footer>
+  </main>
 
-<script src="js/cart.js"></script>
+  <script src="js/cart.js"></script>
 </body>
 </html>

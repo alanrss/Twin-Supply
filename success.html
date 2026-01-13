@@ -1,49 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Order Confirmed | TWIN-SUPPLY</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/styles.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Order Confirmed — Twin-Supply</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
+      <div class="navlinks">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="cart.html">Cart</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
+    </div>
+  </div>
 
-<header class="site-header">
-  <a href="index.html" class="logo">Twin-Supply</a>
+  <main class="wrap">
+    <section class="panel reveal">
+      <div class="panelInner">
+        <div class="kicker">Thank you</div>
+        <div class="h1" style="margin-top:8px">Order confirmed</div>
+        <p class="sub" id="order-id" style="margin-top:10px">Loading order...</p>
 
-  <nav>
-    <a href="shop.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="cart.html">
-      Cart (<span id="cart-count">0</span>)
-    </a>
-  </nav>
-</header>
+        <div class="hr" style="margin:14px 0"></div>
 
-<section class="policy">
-  <h1>Thank you for your order</h1>
-  <p>Your payment was successful.</p>
+        <div id="payment-info" class="notice" style="margin-bottom:14px"></div>
 
-  <a class="btn-primary" href="shop.html">Continue Shopping</a>
-</section>
+        <div id="order-items"></div>
 
-<footer class="footer">
-  <a href="shipping.html">Shipping</a>
-  <a href="returns.html">Returns</a>
-  <a href="privacy.html">Privacy</a>
-  <a href="terms.html">Terms</a>
-  <p>© 2026 TWIN-SUPPLY. All rights reserved.</p>
-</footer>
+        <div class="totalBar" style="margin-top:14px">
+          <b>Total:</b>
+          <b id="order-total">$0.00</b>
+        </div>
 
-<!-- ✅ Limpia el carrito apenas se carga esta página -->
-<script>
-  localStorage.setItem("cart", JSON.stringify([]));
-  localStorage.removeItem("checkoutCart"); // por si lo usas después
-</script>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btnPrimary" href="shop.html">Back to Shop</a>
+          <a class="btn btnGhost" href="index.html">Home</a>
+        </div>
+      </div>
+    </section>
 
-<!-- ✅ Actualiza el contador automáticamente -->
-<script src="js/cart.js"></script>
+    <footer>
+      <span>© Twin-Supply</span>
+      <span>Success</span>
+    </footer>
+  </main>
 
+  <script src="js/cart.js"></script>
+  <script src="js/success.js"></script>
 </body>
 </html>

@@ -1,156 +1,159 @@
-/* shop.js
-   - Vista plantilla: secciones horizontales por categoría
-   - Vista grid: category/gender/favorites
-*/
+(() => {
+  "use strict";
 
-function qs(name) {
-  return new URLSearchParams(window.location.search).get(name);
-}
+  function param(name) {
+    return new URLSearchParams(location.search).get(name);
+  }
 
-function productCardHTML(p) {
-  const liked = window.hasLiked ? window.hasLiked(p.id) : false;
-  const likeCount = window.getLikeCount ? window.getLikeCount(p.id) : 0;
-  const saved = window.isFav ? window.isFav(p.id) : false;
+  function money(n) {
+    const val = Number(n || 0);
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(val);
+  }
 
-  return `
-    <article class="card" data-id="${p.id}">
-      <div class="thumb">
-        <img src="${p.image}" alt="${p.name}">
-      </div>
-      <div class="cardBody">
-        <div class="cardRow">
-          <div class="name">${p.name}</div>
-          <div class="price">$${Number(p.price).toFixed(2)}</div>
-        </div>
-        <div class="desc">${p.gender} · ${p.category}${p.bestseller ? " · 🔥 Best Seller" : ""}${p.featured ? " · ✨ Featured" : ""}</div>
+  function goWithTransition(url) {
+    document.body.classList.add("pageExit");
+    setTimeout(() => (window.location.href = url), 170);
+  }
 
-        <div class="cardActions">
-          <div class="qty" style="width:100%">
-            <button class="qminus">-</button>
-            <input class="qinput" type="number" min="1" value="1">
-            <button class="qplus">+</button>
+  function normalizeDept(v) {
+    const x = String(v || "All").trim().toLowerCase();
+    if (x === "perfumes" || x === "perfume") return "Perfumes";
+    if (x === "clothing" || x === "apparel" || x === "ropa") return "Clothing";
+    return "All";
+  }
+
+  function normalizeGender(v) {
+    const x = String(v || "All").trim().toLowerCase();
+    if (["men","man","male","hombre"].includes(x)) return "Men";
+    if (["women","woman","female","mujer"].includes(x)) return "Women";
+    return "All";
+  }
+
+  function setActive(groupEl, attr, value) {
+    groupEl?.querySelectorAll("button").forEach((b) => {
+      b.classList.toggle("active", String(b.getAttribute(attr)) === String(value));
+    });
+  }
+
+  function cardHTML(p) {
+    const meta = [p.department, p.gender, p.category].filter(Boolean).join(" · ");
+    return `
+      <article class="card" data-id="${p.id}">
+        <div class="thumb"><img src="${p.image}" alt="${p.name}"></div>
+        <div class="cardBody">
+          <div class="cardRow">
+            <div class="name">${p.name}</div>
+            <div class="price">${money(p.price)}</div>
+          </div>
+          <div class="desc">${meta}</div>
+
+          <div class="cardRow" style="margin-top:12px;gap:10px">
+            <div class="qty">
+              <button class="qminus" type="button" aria-label="Decrease">−</button>
+              <input class="qinput" type="number" min="1" value="1" aria-label="Quantity"/>
+              <button class="qplus" type="button" aria-label="Increase">+</button>
+            </div>
+            <button class="btn btnPrimary add-btn" type="button" style="flex:1">Add to Cart</button>
           </div>
         </div>
-
-        <div class="cardActions">
-          <button class="actionBtn add-btn">Add to Cart</button>
-          <button class="iconBtn save-btn ${saved ? "active" : ""}" title="Guardar">🔖</button>
-          <button class="iconBtn like-btn ${liked ? "active" : ""}" title="Like">♥</button>
-        </div>
-
-        <div class="desc" style="margin-top:8px">Likes: <b>${likeCount}</b></div>
-      </div>
-    </article>
-  `;
-}
-
-function bindCard(card) {
-  const id = Number(card.dataset.id);
-
-  card.addEventListener("click", () => {
-    window.location.href = `product.html?id=${id}`;
-  });
-
-  const qinput = card.querySelector(".qinput");
-  card.querySelector(".qminus").addEventListener("click", (e) => {
-    e.preventDefault(); e.stopPropagation();
-    qinput.value = String(Math.max(1, Number(qinput.value || 1) - 1));
-  });
-  card.querySelector(".qplus").addEventListener("click", (e) => {
-    e.preventDefault(); e.stopPropagation();
-    qinput.value = String(Math.max(1, Number(qinput.value || 1) + 1));
-  });
-  qinput.addEventListener("click", (e) => { e.stopPropagation(); });
-
-  card.querySelector(".add-btn").addEventListener("click", (e) => {
-    e.preventDefault(); e.stopPropagation();
-    window.addToCart(id, Number(qinput.value || 1));
-  });
-
-  card.querySelector(".save-btn").addEventListener("click", (e) => {
-    e.preventDefault(); e.stopPropagation();
-    const active = window.toggleFav(id);
-    e.currentTarget.classList.toggle("active", active);
-  });
-
-  card.querySelector(".like-btn").addEventListener("click", (e) => {
-    e.preventDefault(); e.stopPropagation();
-    const res = window.toggleLike(id);
-    e.currentTarget.classList.toggle("active", res.liked);
-    const likesEl = card.querySelector(".desc b");
-    if (likesEl) likesEl.textContent = String(res.count);
-  });
-}
-
-function renderRowSections(products) {
-  const holder = document.getElementById("shop-sections");
-  const grid = document.getElementById("shop-grid");
-  if (!holder || !grid) return;
-
-  grid.style.display = "none";
-  holder.style.display = "block";
-
-  const categories = Array.from(new Set(products.map(p => p.category)));
-  holder.innerHTML = categories.map(cat => {
-    const items = products.filter(p => p.category === cat).slice(0, 12);
-    if (items.length === 0) return "";
-    return `
-      <section class="section">
-        <div class="sectionHead">
-          <h2>${cat}</h2>
-          <a class="chip active" href="shop.html?category=${encodeURIComponent(cat)}">Ver todo →</a>
-        </div>
-        <div class="hr"></div>
-        <div class="rowScroll">
-          ${items.map(productCardHTML).join("")}
-        </div>
-      </section>
+      </article>
     `;
-  }).join("");
-
-  holder.querySelectorAll(".card").forEach(bindCard);
-}
-
-function renderGridView(products, titleText) {
-  const holder = document.getElementById("shop-sections");
-  const grid = document.getElementById("shop-grid");
-  const title = document.getElementById("shop-title");
-  if (!holder || !grid) return;
-
-  holder.style.display = "none";
-  grid.style.display = "grid";
-  if (title) title.textContent = titleText || "Todos los productos";
-
-  grid.innerHTML = products.map(productCardHTML).join("");
-  grid.querySelectorAll(".card").forEach(bindCard);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.updateCartCount) window.updateCartCount();
-
-  const products = window.allProducts || [];
-
-  const category = qs("category");
-  const gender = qs("gender");
-  const view = qs("view");
-
-  // Favorites view
-  if (view === "favorites") {
-    const favs = window.getFavs ? window.getFavs() : [];
-    const favProducts = products.filter(p => favs.includes(Number(p.id)));
-    renderGridView(favProducts, "Tus Favoritos (Guardados)");
-    return;
   }
 
-  // Filter view
-  if (category || gender) {
+  function attachCard(card) {
+    const id = Number(card.dataset.id);
+    const q = card.querySelector(".qinput");
+
+    card.addEventListener("click", () => {
+      goWithTransition(`product.html?id=${id}`);
+    });
+
+    card.querySelector(".qminus").addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      q.value = String(Math.max(1, Number(q.value || 1) - 1));
+    });
+    card.querySelector(".qplus").addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      q.value = String(Math.max(1, Number(q.value || 1) + 1));
+    });
+    q.addEventListener("click", (e) => e.stopPropagation());
+
+    card.querySelector(".add-btn").addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (window.addToCart) window.addToCart(id, Number(q.value || 1));
+    });
+  }
+
+  function render(dept, gender) {
+    const grid = document.getElementById("shop-grid");
+    const notice = document.getElementById("shop-notice");
+    const subtitle = document.getElementById("shop-subtitle");
+    const products = window.allProducts || [];
+
     let list = products.slice();
-    if (category) list = list.filter(p => p.category === category);
-    if (gender) list = list.filter(p => p.gender === gender);
-    renderGridView(list, "Resultados");
-    return;
+
+    if (dept !== "All") list = list.filter((p) => String(p.department) === dept);
+    if (gender !== "All") list = list.filter((p) => String(p.gender) === gender);
+
+    if (subtitle) {
+      const parts = [];
+      if (dept !== "All") parts.push(dept);
+      if (gender !== "All") parts.push(gender);
+      subtitle.textContent = parts.length ? parts.join(" · ") : "All products";
+    }
+
+    if (!list.length) {
+      if (notice) {
+        notice.style.display = "block";
+        notice.textContent = "No products found for this filter. Try switching to All.";
+      }
+      if (grid) grid.innerHTML = "";
+      return;
+    } else if (notice) {
+      notice.style.display = "none";
+      notice.textContent = "";
+    }
+
+    if (grid) {
+      grid.innerHTML = list.map(cardHTML).join("");
+      grid.querySelectorAll(".card").forEach(attachCard);
+    }
   }
 
-  // Default: template sections (horizontal)
-  renderRowSections(products);
-});
+  function updateURL(dept, gender) {
+    const url = new URL(location.href);
+    if (dept && dept !== "All") url.searchParams.set("dept", dept); else url.searchParams.delete("dept");
+    if (gender && gender !== "All") url.searchParams.set("gender", gender); else url.searchParams.delete("gender");
+    history.replaceState({}, "", url.toString());
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const deptSeg = document.getElementById("dept-seg");
+    const genderSeg = document.getElementById("gender-seg");
+
+    let dept = normalizeDept(param("dept"));
+    let gender = normalizeGender(param("gender"));
+
+    setActive(deptSeg, "data-dept", dept);
+    setActive(genderSeg, "data-gender", gender);
+    render(dept, gender);
+
+    deptSeg?.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        dept = normalizeDept(btn.getAttribute("data-dept"));
+        setActive(deptSeg, "data-dept", dept);
+        updateURL(dept, gender);
+        render(dept, gender);
+      });
+    });
+
+    genderSeg?.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        gender = normalizeGender(btn.getAttribute("data-gender"));
+        setActive(genderSeg, "data-gender", gender);
+        updateURL(dept, gender);
+        render(dept, gender);
+      });
+    });
+  });
+})();
