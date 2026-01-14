@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin — Twin-Supply</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
+      <div class="navlinks">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="cart.html">Cart</a>
+      </div>
+      <a class="pill" href="shop.html">Shop</a>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="panel" id="login-box">
+      <div class="panelInner">
+        <div class="kicker">Admin Login</div>
+        <div class="h1">Acceso</div>
+        <p class="sub">Login simple (localStorage).</p>
+        <div class="field">
+          <label>Password</label>
+          <input id="admin-pass" type="password" placeholder="Password"/>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+          <button id="login-btn" class="btn btnPrimary">Entrar</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="admin-box" style="display:none">
+      <section class="panel">
+        <div class="panelInner">
+          <div class="sectionHead">
+            <h2>Panel de Admin</h2>
+            <button id="logout-btn" class="btn">Logout</button>
+          </div>
+          <div class="hr"></div>
+
+          <div class="adminGrid">
+            <div class="panel">
+              <div class="panelInner">
+                <div class="kicker">Producto</div>
+
+                <input id="p-id" type="hidden"/>
+
+                <div class="field">
+                  <label>Name</label>
+                  <input id="p-name" placeholder="Nombre"/>
+                </div>
+
+                <div class="inlineRow">
+                  <div class="field" style="flex:1">
+                    <label>Price</label>
+                    <input id="p-price" type="number" step="0.01" placeholder="0"/>
+                  </div>
+                  <div class="field" style="flex:1">
+                    <label>Stock</label>
+                    <input id="p-stock" type="number" placeholder="0"/>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Image URL / path</label>
+                  <input id="p-image" placeholder="assets/..." />
+                </div>
+
+                <div class="field">
+                  <label>Department</label>
+                  <select id="p-department">
+                    <option value="Clothing">Clothing</option>
+                    <option value="Perfumes">Perfumes</option>
+                  </select>
+                </div>
+
+                <div class="inlineRow">
+                  <div class="field" style="flex:1">
+                    <label>Gender</label>
+                    <select id="p-gender">
+                      <option>Unisex</option>
+                      <option>Hombre</option>
+                      <option>Mujer</option>
+                    </select>
+                  </div>
+                  <div class="field" style="flex:1">
+                    <label>Category</label>
+                    <input id="p-category" placeholder="Sneakers, Hoodies..." />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Description</label>
+                  <textarea id="p-desc" placeholder="Descripción..."></textarea>
+                </div>
+
+                <div class="checkRow">
+                  <input id="p-featured" type="checkbox">
+                  <label for="p-featured" style="margin:0;text-transform:none;letter-spacing:0;font-size:14px">Featured (sale en Home/Top)</label>
+                </div>
+                <div class="checkRow">
+                  <input id="p-bestseller" type="checkbox">
+                  <label for="p-bestseller" style="margin:0;text-transform:none;letter-spacing:0;font-size:14px">Best Seller (sale en Home/Top)</label>
+                </div>
+
+                <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+                  <button id="save-btn" class="btn btnPrimary">Guardar</button>
+                  <button id="clear-btn" class="btn">Limpiar</button>
+                  <button id="reset-btn" class="btn btnDanger">Reset Products</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panelInner">
+                <div class="kicker">Listado</div>
+                <div id="products-list" class="list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <span>© Twin-Supply</span>
+      <span>Admin</span>
+    </footer>
+  </main>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

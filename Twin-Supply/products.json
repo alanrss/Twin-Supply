@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "name": "Essential Hoodie",
+    "price": 65,
+    "image": "assets/placeholder.jpg",
+    "gender": "Unisex",
+    "category": "Hoodies",
+    "stock": 20,
+    "description": "Algod\u00f3n premium \u00b7 Fit relajado",
+    "featured": true,
+    "bestseller": true,
+    "department": "Clothing"
+  },
+  {
+    "id": 2,
+    "name": "Street Tee",
+    "price": 28,
+    "image": "assets/placeholder.jpg",
+    "gender": "Unisex",
+    "category": "T-Shirts",
+    "stock": 50,
+    "description": "Minimal \u00b7 Soft touch",
+    "featured": true,
+    "bestseller": false,
+    "department": "Clothing"
+  },
+  {
+    "id": 3,
+    "name": "Retro Cap",
+    "price": 22,
+    "image": "assets/placeholder.jpg",
+    "gender": "Unisex",
+    "category": "Accessories",
+    "stock": 35,
+    "description": "Bordado fino \u00b7 Ajustable",
+    "featured": false,
+    "bestseller": false,
+    "department": "Clothing"
+  },
+  {
+    "id": 4,
+    "name": "Sneakers Drop",
+    "price": 120,
+    "image": "assets/placeholder.jpg",
+    "gender": "Hombre",
+    "category": "Sneakers",
+    "stock": 8,
+    "description": "Edici\u00f3n limitada \u00b7 Stock bajo",
+    "featured": false,
+    "bestseller": true,
+    "department": "Clothing"
+  }
+]

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Twin-Supply</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
+      <div class="navlinks">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="shop.html?view=favorites">Favorites</a>
+        <a href="cart.html">Cart</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <!-- Mantengo tu inicio: Presence is Everything + Shop Now -->
+    <section class="panel">
+      <div class="stripe"></div>
+      <div class="panelInner">
+        <div class="kicker">Presence is Everything</div>
+        <div class="h1">Dark store,<br/>soft glow.</div>
+        <p class="sub">Tu home queda igual en mensaje principal + botón. Lo nuevo empieza debajo.</p>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btnPrimary" href="shop.html">Shop Now</a>
+          <a class="btn btnGhost" href="shop.html?view=favorites">Ver Favorites</a>
+        </div>
+
+        <!-- Nota visual (como pediste) -->
+        <div class="heroNote">
+          <b>Nota visual</b>
+          <p>Cards suaves, glow pastel, blur premium. Tus productos se ven “tienda real”.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Debajo del Shop Now: Best Sellers (automático desde Admin) -->
+    <section class="section">
+      <div class="sectionHead">
+        <h2>Best Sellers / Top Products</h2>
+        <span>Automático desde Admin (Best Seller / Featured)</span>
+      </div>
+      <div class="hr"></div>
+      <div id="best-grid" class="grid"></div>
+    </section>
+
+    <!-- Secciones por categoría (ya no fragrance/apparel fijo) -->
+    <div id="category-rows"></div>
+
+    <footer>
+      <span>© Twin-Supply</span>
+      <span>Dark Store · Soft Glow</span>
+    </footer>
+  </main>
+
+  <!-- Scripts (orden IMPORTANTE) -->
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/social.js"></script>
+  <script src="js/home.js"></script>
+</body>
+</html>

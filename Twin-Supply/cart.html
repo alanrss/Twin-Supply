@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Cart — Twin-Supply</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="logo" href="index.html"><span class="mark"></span> Twin-Supply</a>
+      <div class="navlinks">
+        <a href="shop.html">Shop</a>
+        <a href="shop.html?view=favorites">Favorites</a>
+        <a href="cart.html">Cart</a>
+      </div>
+      <a class="pill" href="cart.html">Cart <span id="cart-count" class="badge">0</span></a>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="panel">
+      <div class="panelInner">
+        <div class="kicker">Cart</div>
+        <div class="h1">Tu carrito</div>
+        <p class="sub">Qty stepper, total y limpieza automática si un producto se elimina.</p>
+      </div>
+    </section>
+
+    <div id="cart-items" class="cartList"></div>
+
+    <div class="totalBar">
+      <b>Total:</b>
+      <b id="cart-total">$0.00</b>
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn btnPrimary" href="checkout.html">Checkout</a>
+      <a class="btn btnGhost" href="shop.html">Seguir comprando</a>
+    </div>
+
+    <footer>
+      <span>© Twin-Supply</span>
+      <span>Cart</span>
+    </footer>
+  </main>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.renderCart) window.renderCart();
+    });
+  </script>
+</body>
+</html>
