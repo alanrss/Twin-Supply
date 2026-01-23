@@ -1,6 +1,8 @@
 /* products.js
-   - Fuente única de productos: localStorage("products") con fallback a baseProducts
-   - Includes: department, featured, bestseller
+   - Fuente principal: data/products.json (GitHub)
+   - Cache local: localStorage("products")
+   - Expone: window.allProducts, window.saveProducts, window.getProductById
+   - NUEVO: window.productsReady (Promise) + window.syncProductsFromRemote()
 */
 
 const PRODUCTS_KEY = "products";
@@ -61,7 +63,6 @@ function normalizeGender(g) {
   if (["men","man","male","hombre","hombres","m","mens"].includes(v)) return "Men";
   if (["women","woman","female","mujer","mujeres","w","womens"].includes(v)) return "Women";
   if (["unisex","all","todos","todas"].includes(v)) return "Unisex";
-  // if unknown, keep original but Title Case
   const raw = String(g || "Unisex").trim();
   if (!raw) return "Unisex";
   return raw.charAt(0).toUpperCase() + raw.slice(1);
@@ -94,19 +95,14 @@ function normalizeProduct(p) {
   };
 }
 
-function loadProducts() {
+function loadLocalProducts() {
   const raw = localStorage.getItem(PRODUCTS_KEY);
   let list = [];
   if (raw) {
-    try {
-      list = JSON.parse(raw);
-    } catch {
-      list = [];
-    }
+    try { list = JSON.parse(raw); } catch { list = []; }
   }
   if (!Array.isArray(list) || list.length === 0) list = baseProducts;
   const normalized = list.map(normalizeProduct);
-  // guarda normalizado para que admin/home/tienda usen lo mismo
   localStorage.setItem(PRODUCTS_KEY, JSON.stringify(normalized));
   return normalized;
 }
@@ -123,8 +119,49 @@ function getProductById(id) {
   return (window.allProducts || []).find(p => Number(p.id) === pid);
 }
 
+async function fetchRemoteProducts() {
+  // resuelve bien rutas en GitHub Pages (shop.html/admin.html/etc)
+  const url = new URL("data/products.json", window.location.href);
+  url.searchParams.set("v", String(Date.now())); // cache-bust
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) throw new Error("No pude cargar data/products.json");
+  const data = await res.json();
+  if (!Array.isArray(data)) throw new Error("data/products.json no es un array");
+  return data;
+}
+
+function sameProducts(a, b) {
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
+
+async function syncProductsFromRemote() {
+  const remote = await fetchRemoteProducts();
+  const normalizedRemote = remote.map(normalizeProduct);
+  const local = loadLocalProducts(); // ya normaliza
+  if (!sameProducts(local, normalizedRemote)) {
+    saveProducts(normalizedRemote);
+    window.dispatchEvent(new CustomEvent("products:updated", { detail: normalizedRemote }));
+  }
+  return window.allProducts;
+}
+
+// Exponer globals
 window.baseProducts = baseProducts;
-window.allProducts = loadProducts();
+window.PRODUCTS_KEY = PRODUCTS_KEY;
 window.saveProducts = saveProducts;
 window.getProductById = getProductById;
-window.PRODUCTS_KEY = PRODUCTS_KEY;
+
+// Inicial inmediato (para que no “truene” nada)
+window.allProducts = loadLocalProducts();
+
+// NUEVO: Promise para que shop/product/admin puedan esperar antes de renderizar
+window.syncProductsFromRemote = syncProductsFromRemote;
+window.productsReady = (async () => {
+  try { await syncProductsFromRemote(); }
+  catch (e) { console.warn("[products] Remote sync failed:", e); }
+  return window.allProducts;
+})();
