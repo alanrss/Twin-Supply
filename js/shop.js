@@ -59,6 +59,10 @@
       </article>
     `;
   }
+document.addEventListener("DOMContentLoaded", async () => {
+  await (window.productsReady || Promise.resolve());
+  // ... tu código normal de render
+});
 
   function attachCard(card) {
     const id = Number(card.dataset.id);
