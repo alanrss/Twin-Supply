@@ -59,10 +59,6 @@
       </article>
     `;
   }
-document.addEventListener("DOMContentLoaded", async () => {
-  await (window.productsReady || Promise.resolve());
-  // ... tu código normal de render
-});
 
   function attachCard(card) {
     const id = Number(card.dataset.id);
@@ -76,15 +72,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault(); e.stopPropagation();
       q.value = String(Math.max(1, Number(q.value || 1) - 1));
     });
+
     card.querySelector(".qplus").addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
       q.value = String(Math.max(1, Number(q.value || 1) + 1));
     });
+
     q.addEventListener("click", (e) => e.stopPropagation());
 
     card.querySelector(".add-btn").addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
-      if (window.addToCart) window.addToCart(id, Number(q.value || 1));
+      const qty = Math.max(1, Number(q.value || 1));
+      if (window.addToCart) window.addToCart(id, qty);
     });
   }
 
@@ -131,7 +130,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     history.replaceState({}, "", url.toString());
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+    // ✅ Esperar a que products.js sincronice products.json → localStorage → window.allProducts
+    await (window.productsReady || Promise.resolve());
+
     const deptSeg = document.getElementById("dept-seg");
     const genderSeg = document.getElementById("gender-seg");
 
@@ -159,5 +161,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         render(dept, gender);
       });
     });
+
+    // (Opcional) si el admin actualiza y quieres refrescar sin recargar:
+    window.addEventListener("products:updated", () => render(dept, gender));
   });
 })();
