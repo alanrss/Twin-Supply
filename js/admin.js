@@ -12,7 +12,7 @@
   const ADMIN_SESSION_KEY = "adminLogged";
 
   // === NUEVO: endpoint del backend (Vercel) ===
-  const PUBLISH_ENDPOINT = "https://YOUR_VERCEL_APP.vercel.app/api/update-products";
+const PUBLISH_ENDPOINT = "https://twin-supply.vercel.app/api/update-products";
 
   const $ = (id) => document.getElementById(id);
 
