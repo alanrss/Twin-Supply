@@ -2,6 +2,7 @@
    - Simple local login
    - Product CRUD (saved to localStorage)
    - Department + Gender helpers
+   - NUEVO: Publish a GitHub (products.json) via endpoint seguro
 */
 
 (() => {
@@ -10,6 +11,9 @@
   const ADMIN_PASSWORD = "1234"; // Change this if you want
   const ADMIN_SESSION_KEY = "adminLogged";
 
+  // === NUEVO: endpoint del backend (Vercel) ===
+  const PUBLISH_ENDPOINT = "https://YOUR_VERCEL_APP.vercel.app/api/update-products";
+
   const $ = (id) => document.getElementById(id);
 
   const CATEGORY_SUGGESTIONS = {
@@ -17,7 +21,86 @@
     Perfumes: ["Perfume", "Cologne", "Fragrance", "Oud", "Attar", "Body Spray", "Oil", "Gift Set"]
   };
 
-  function requireLogin() {
+  function ensureStatusEl() {
+    let el = document.getElementById("publish-status");
+    const adminBox = $("admin-box");
+    if (!adminBox) return null;
+
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "publish-status";
+      el.style.cssText = "margin:10px 0;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;font-weight:800;font-size:13px;color:var(--muted)";
+      el.textContent = "Publish: not configured yet.";
+      adminBox.prepend(el);
+    }
+    return el;
+  }
+
+  function setStatus(msg, mode = "info") {
+    const el = ensureStatusEl();
+    if (!el) return;
+    const colors = {
+      info: "rgba(255,255,255,.12)",
+      ok: "rgba(0,255,140,.25)",
+      warn: "rgba(255,190,0,.25)",
+      err: "rgba(255,80,80,.25)"
+    };
+    el.style.borderColor = colors[mode] || colors.info;
+    el.style.color = (mode === "err") ? "#ff8a8a" : (mode === "ok") ? "#7dffb5" : "var(--muted)";
+    el.textContent = msg;
+  }
+
+  function getPublishKey() {
+    // Guardar solo en sesión (no en tu repo)
+    let key = sessionStorage.getItem("publishKey");
+    if (!key) {
+      key = prompt("Enter your Publish Key (Vercel ADMIN_KEY):");
+      if (key) sessionStorage.setItem("publishKey", key);
+    }
+    return key || "";
+  }
+
+  async function publishProductsToGitHub(products) {
+    if (!PUBLISH_ENDPOINT || PUBLISH_ENDPOINT.includes("YOUR_VERCEL_APP")) {
+      setStatus("Publish: configure PUBLISH_ENDPOINT in admin.js", "warn");
+      return;
+    }
+    const adminKey = getPublishKey();
+    if (!adminKey) {
+      setStatus("Publish canceled: missing key.", "warn");
+      return;
+    }
+
+    setStatus("Publishing to GitHub…", "info");
+
+    const resp = await fetch(PUBLISH_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Admin-Key": adminKey
+      },
+      body: JSON.stringify({ products })
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      throw new Error(data.error || "Publish failed");
+    }
+
+    setStatus("✅ Published to GitHub (products.json updated).", "ok");
+  }
+
+  async function safePublishCurrent() {
+    try {
+      await publishProductsToGitHub(window.allProducts || []);
+    } catch (e) {
+      console.error(e);
+      setStatus("❌ Publish failed (saved locally). " + e.message, "err");
+      alert("Saved locally but failed to publish to GitHub:\n" + e.message);
+    }
+  }
+
+  async function requireLogin() {
     const logged = localStorage.getItem(ADMIN_SESSION_KEY) === "true";
     const loginBox = $("login-box");
     const adminBox = $("admin-box");
@@ -26,8 +109,12 @@
     if (adminBox) adminBox.style.display = logged ? "block" : "none";
 
     if (logged) {
+      // Trae lo último de products.json antes de renderizar
+      if (window.productsReady) await window.productsReady;
+
       renderCategoryDatalist($("p-dept")?.value || "Clothing");
       renderList();
+      setStatus("Publish: ready (will publish on save/delete/reset).", "info");
     }
   }
 
@@ -87,7 +174,7 @@
     renderCategoryDatalist("Clothing");
   }
 
-  function upsertProduct() {
+  async function upsertProduct() {
     const data = readForm();
 
     if (!data.name || !data.category) {
@@ -107,22 +194,27 @@
       else products.unshift(data);
     }
 
-    // saveProducts normalizes fields (gender mapping, etc.)
     window.saveProducts(products);
     renderList(data.id);
     clearForm();
+
+    // NUEVO: publica al repo
+    await safePublishCurrent();
   }
 
-  function deleteProduct(id) {
+  async function deleteProduct(id) {
     const pid = Number(id);
     if (!confirm("Delete this product?")) return;
 
     const products = (window.allProducts || []).filter((p) => Number(p.id) !== pid);
     window.saveProducts(products);
     renderList();
+
+    // NUEVO: publica al repo
+    await safePublishCurrent();
   }
 
-  function resetProducts() {
+  async function resetProducts() {
     if (!confirm("Reset products to default and clear the cart?")) return;
 
     localStorage.setItem(window.PRODUCTS_KEY, JSON.stringify(window.baseProducts || []));
@@ -130,6 +222,9 @@
     window.allProducts = (window.baseProducts || []).slice();
     renderList();
     alert("Products reset. Cart cleared.");
+
+    // NUEVO: publica al repo
+    await safePublishCurrent();
   }
 
   function money(n) {
@@ -201,11 +296,11 @@
   document.addEventListener("DOMContentLoaded", () => {
     requireLogin();
 
-    $("login-btn")?.addEventListener("click", () => {
+    $("login-btn")?.addEventListener("click", async () => {
       const pass = String($("admin-pass")?.value || "");
       if (pass === ADMIN_PASSWORD) {
         localStorage.setItem(ADMIN_SESSION_KEY, "true");
-        requireLogin();
+        await requireLogin();
       } else {
         alert("Wrong password.");
       }
