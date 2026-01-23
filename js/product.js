@@ -24,7 +24,6 @@
       .filter((p) => p.id !== current.id)
       .filter((p) => p.department === current.department || p.category === current.category);
 
-    // fallback if not enough
     if (list.length < 4) {
       const extra = products.filter((p) => p.id !== current.id);
       const seen = new Set();
@@ -66,7 +65,10 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+    // ✅ Esperar sync products.json antes de buscar el producto por id
+    await (window.productsReady || Promise.resolve());
+
     const id = Number(qs("id"));
     const p = window.getProductById ? window.getProductById(id) : null;
 
