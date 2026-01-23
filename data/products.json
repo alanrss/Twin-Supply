@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "name": "Essential Hoodie",
+    "price": 65,
+    "image": "assets/placeholder.jpg",
+    "department": "Clothing",
+    "gender": "Unisex",
+    "category": "Hoodies",
+    "stock": 20,
+    "description": "Algodón premium · Fit relajado",
+    "featured": true,
+    "bestseller": true
+  }
+]
