@@ -1,18 +1,5 @@
 [
   {
-    "id": 2,
-    "name": "a",
-    "price": 11,
-    "image": "assets/placeholder.jpg",
-    "department": "Perfumes",
-    "gender": "Unisex",
-    "category": "Hats",
-    "stock": 1,
-    "description": "",
-    "featured": false,
-    "bestseller": false
-  },
-  {
     "id": 1,
     "name": "Essential Hoodie",
     "price": 65,
