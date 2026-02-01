@@ -114,8 +114,30 @@
                   <div class="kicker" style="margin-top:10px">Payment</div>
               <div class="hr"></div>
               <div id="paypal-missing" class="kicker" style="color:var(--muted);display:none">PayPal is not configured. Open Admin → Dashboard → Payments and paste your Client ID.</div>
-              <div class="kicker" style="margin-top:10px">Complete payment with PayPal</div>
-              <div id="paypal-buttons" style="max-width:420px"></div>
+              <div class="kicker" style="margin-top:10px">Payment</div>
+              <div class="kicker" style="color:var(--muted);margin-top:6px">
+                PayPal will show Venmo automatically when eligible (US, USD, supported device/browser). Cash App Pay shows when you configure it in Dashboard.
+              </div>
+
+              <div style="max-width:420px;display:grid;gap:14px;margin-top:10px">
+                <div>
+                  <div class="kicker">PayPal</div>
+                  <div id="paypal-buttons"></div>
+                </div>
+
+                <div id="venmo-wrap" style="display:none">
+                  <div class="kicker">Venmo</div>
+                  <div id="venmo-buttons"></div>
+                  <div class="kicker" style="color:var(--muted);margin-top:6px">If you don’t see Venmo: it’s not eligible for this device/browser or you’re using sandbox.</div>
+                </div>
+
+                <div id="cashapp-wrap" style="display:none">
+                  <div class="kicker">Cash App Pay</div>
+                  <div id="cashapp-button"></div>
+                  <div id="cashapp-status" class="kicker" style="color:var(--muted);margin-top:10px"></div>
+                </div>
+              </div>
+
               <div id="paypal-status" class="kicker" style="color:var(--muted);margin-top:10px"></div>
 
                   <span id="checkout-msg" style="color:var(--muted);font-weight:900"></span>

@@ -25,7 +25,25 @@
     return "TS-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7);
   }
 
-  function money(n, currency) {
+  
+  function getApiBase() {
+    return String(settings.squareApiBaseUrl || "https://twin-supply.vercel.app").replace(/\/$/, "");
+  }
+
+  function collectCustomer() {
+    return {
+      name: $("c-name")?.value.trim(),
+      email: $("c-email")?.value.trim(),
+      phone: $("c-phone")?.value.trim(),
+      address1: $("c-address1")?.value.trim(),
+      address2: $("c-address2")?.value.trim(),
+      city: $("c-city")?.value.trim(),
+      state: $("c-state")?.value.trim(),
+      zip: $("c-zip")?.value.trim(),
+      country: $("c-country")?.value.trim()
+    };
+  }
+function money(n, currency) {
     const val = Number(n || 0);
     return new Intl.NumberFormat("en-US", { style: "currency", currency: currency || "USD" }).format(val);
   }
@@ -55,7 +73,11 @@
         { id: "standard", name: "Standard", price: 7.99 },
         { id: "express", name: "Express", price: 14.99 },
         { id: "pickup", name: "Pickup", price: 0 }
-      ]
+      ],
+      squareAppId: "",
+      squareLocationId: "",
+      squareEnv: "sandbox",
+      squareApiBaseUrl: "https://twin-supply.vercel.app"
     };
 
     const s = getJSON(SETTINGS_KEY, def);
@@ -71,6 +93,11 @@
     if (typeof s.paypalBrand !== "string") s.paypalBrand = String(s.paypalBrand || "Twin-Supply");
     if (typeof s.orderWebhookUrl !== "string") s.orderWebhookUrl = String(s.orderWebhookUrl || "");
     if (typeof s.orderWebhookToken !== "string") s.orderWebhookToken = String(s.orderWebhookToken || "");
+
+    if (typeof s.squareAppId !== "string") s.squareAppId = String(s.squareAppId || "");
+    if (typeof s.squareLocationId !== "string") s.squareLocationId = String(s.squareLocationId || "");
+    if (String(s.squareEnv || "").toLowerCase() !== "live") s.squareEnv = "sandbox";
+    if (typeof s.squareApiBaseUrl !== "string") s.squareApiBaseUrl = String(s.squareApiBaseUrl || "https://twin-supply.vercel.app");
 
     if (!Array.isArray(s.shippingMethods) || !s.shippingMethods.length) s.shippingMethods = def.shippingMethods;
     return s;
@@ -150,7 +177,7 @@
         encodeURIComponent(clientId) +
         "&currency=" +
         encodeURIComponent(currency || "USD") +
-        "&intent=capture&commit=true&components=buttons";
+        "&intent=capture&commit=true&components=buttons&enable-funding=venmo";
       script.onload = () => resolve();
       script.onerror = () => reject(new Error("PayPal SDK failed to load"));
       document.head.appendChild(script);
@@ -196,6 +223,12 @@
   const ppMissing = $("paypal-missing");
   const ppButtons = $("paypal-buttons");
   const ppStatus = $("paypal-status");
+
+  const venmoWrap = $("venmo-wrap");
+  const venmoButtons = $("venmo-buttons");
+  const cashAppWrap = $("cashapp-wrap");
+  const cashAppButton = $("cashapp-button");
+  const cashAppStatus = $("cashapp-status");
 
   // Guard: PayPal buttons often won't render on file:// and localStorage can behave inconsistently.
   if (location.protocol === "file:") {
@@ -298,7 +331,7 @@
     return true;
   }
 
-  function buildOrderDraft(paypalDetails) {
+  function buildOrderDraft(paypalDetails, opts = {}) {
     const shippingCharged = getShipPriceById(shipSelect?.value, settings);
     const labelInput = Number(labelCostEl?.value || 0);
     const shippingLabelCost = labelInput > 0 ? labelInput : shippingCharged;
@@ -317,7 +350,7 @@
     const profit = totals.total - cogs - fee - shippingLabelCost;
 
     const order = {
-      id: uid(),
+      id: (opts.orderId || uid()),
       createdAt: new Date().toISOString(),
       status: "paid",
       customer: {
@@ -346,6 +379,7 @@
       profit,
       payment: {
         provider: "paypal",
+        method: String(opts.method || "paypal"),
         paypalOrderId: paypalDetails?.id || "",
         paypalCaptureId: capture?.id || "",
         paypalStatus: capture?.status || paypalDetails?.status || "",
@@ -355,6 +389,221 @@
     };
 
     return order;
+  }
+
+
+  // ===== CASH APP PAY (Square Web Payments SDK) =====
+  function squareMoneyToCents(amount) {
+    const n = Number(amount || 0);
+    return Math.round(n * 100);
+  }
+
+  function loadSquareSdk(env) {
+    return new Promise((resolve, reject) => {
+      if (window.Square && typeof window.Square.payments === "function") return resolve(true);
+
+      const isLive = String(env || "").toLowerCase() === "live";
+      const src = isLive
+        ? "https://web.squarecdn.com/v1/square.js"
+        : "https://sandbox.web.squarecdn.com/v1/square.js";
+
+      const existing = document.querySelector(`script[data-square-sdk="true"]`);
+      if (existing) {
+        existing.addEventListener("load", () => resolve(true));
+        existing.addEventListener("error", reject);
+        return;
+      }
+
+      const s = document.createElement("script");
+      s.src = src;
+      s.async = true;
+      s.dataset.squareSdk = "true";
+      s.onload = () => resolve(true);
+      s.onerror = (e) => reject(e);
+      document.head.appendChild(s);
+    });
+  }
+
+  async function initCashAppPay() {
+    if (!cashAppWrap || !cashAppButton) return;
+
+    // Only show Cash App if configured in Dashboard
+    if (!settings.squareAppId || !settings.squareLocationId) return;
+
+    // Cash App Pay is US-only (Square requirement).
+    // We still try to render; SDK will hide it if not eligible.
+    cashAppWrap.style.display = "block";
+    if (cashAppStatus) cashAppStatus.textContent = "Loading Cash App Pay...";
+
+    try {
+      await loadSquareSdk(settings.squareEnv);
+
+      if (!window.Square || typeof window.Square.payments !== "function") {
+        throw new Error("Square SDK not available");
+      }
+
+      const payments = window.Square.payments(settings.squareAppId, settings.squareLocationId);
+
+      const shippingCharged = getShipPriceById(shipSelect?.value, settings);
+      const totals = calcTotals(items, shippingCharged, settings.taxRate);
+
+      const paymentRequest = payments.paymentRequest({
+        countryCode: "US",
+        currencyCode: settings.currency || "USD",
+        total: { amount: totals.total.toFixed(2), label: "Total" }
+      });
+
+      const cashAppPay = await payments.cashAppPay(paymentRequest, {
+        redirectURL: window.location.href,
+        referenceId: uid()
+      });
+
+      await cashAppPay.attach("#cashapp-button");
+
+      if (cashAppStatus) cashAppStatus.textContent = "";
+
+      // Disable / enable based on form validity (same rules as PayPal)
+      const setDisabled = () => {
+        // Square Cash App Pay doesn't have actions.disable() like PayPal,
+        // so we just show a message if form is invalid.
+        if (!isFormValid()) {
+          if (cashAppStatus) cashAppStatus.textContent = "Fill in your info to enable Cash App Pay.";
+        } else if (cashAppStatus && cashAppStatus.textContent === "Fill in your info to enable Cash App Pay.") {
+          cashAppStatus.textContent = "";
+        }
+      };
+      ["input", "change", "keyup"].forEach((evt) => form?.addEventListener(evt, setDisabled));
+      shipSelect?.addEventListener("change", setDisabled);
+      setDisabled();
+
+      cashAppPay.addEventListener("ontokenization", async (event) => {
+        const { tokenResult, error } = event.detail || {};
+        if (error) {
+          console.error(error);
+          if (cashAppStatus) cashAppStatus.textContent = "Cash App Pay error. Try again.";
+          return;
+        }
+
+        if (!isFormValid()) {
+          reportValidationErrors();
+          if (cashAppStatus) cashAppStatus.textContent = "Please complete your information first.";
+          return;
+        }
+
+        if (tokenResult?.status !== "OK" || !tokenResult?.token) {
+          if (cashAppStatus) cashAppStatus.textContent = "Cash App Pay was cancelled.";
+          return;
+        }
+
+        if (cashAppStatus) cashAppStatus.textContent = "Processing Cash App payment...";
+
+        const shippingCharged2 = getShipPriceById(shipSelect?.value, settings);
+        const totals2 = calcTotals(items, shippingCharged2, settings.taxRate);
+
+        // IMPORTANT: In production, calculate totals on the server to prevent tampering.
+        const apiBase = (settings.squareApiBaseUrl || "https://twin-supply.vercel.app").replace(/\/$/, "");
+        const localOrderId = uid();
+        const payload = {
+          sourceId: tokenResult.token,
+          idempotencyKey: (crypto?.randomUUID ? crypto.randomUUID() : uid()),
+          currency: settings.currency || "USD",
+          buyerEmail: $("c-email")?.value.trim() || "",
+          locationId: settings.squareLocationId || "",
+          cart: items.map((it) => ({ id: it.id, qty: it.qty })),
+          shippingMethodId: shipSelect?.value || "standard",
+          expectedTotal: totals2.total,
+          customer: collectCustomer(),
+          notes: $("order-notes")?.value.trim(),
+          localOrderId
+        };
+
+        try {
+          const resp = await fetch(`${apiBase}/api/square-create-payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await resp.json().catch(() => ({}));
+          if (!resp.ok) {
+            console.error("Square payment failed", data);
+            if (cashAppStatus) cashAppStatus.textContent = "Cash App payment failed. Please try again.";
+            return;
+          }
+
+          // Save order locally (same format as PayPal orders)
+          const orders = getJSON(ORDERS_KEY, []);
+          const order = buildOrderDraftCashApp(data?.payment || data, { orderId: payload.localOrderId });
+          orders.unshift(order);
+          setJSON(ORDERS_KEY, orders);
+
+          sendOrderToWebhook(order);
+
+          updateProductsStockAfterOrder(items);
+          setJSON(CART_KEY, []);
+
+          window.location.href = "success.html?orderId=" + encodeURIComponent(order.id);
+        } catch (e) {
+          console.error(e);
+          if (cashAppStatus) cashAppStatus.textContent = "Cash App payment failed. Please try again.";
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      cashAppWrap.style.display = "none";
+      if (cashAppStatus) cashAppStatus.textContent = "";
+    }
+  }
+
+  function buildOrderDraftCashApp(squarePayment, opts = {}) {
+    const shippingCharged = getShipPriceById(shipSelect?.value, settings);
+    const labelInput = Number(labelCostEl?.value || 0);
+    const shippingLabelCost = labelInput > 0 ? labelInput : shippingCharged;
+
+    const totals = calcTotals(items, shippingCharged, settings.taxRate);
+    const cogs = items.reduce((sum, it) => sum + Number(it.cost || 0) * it.qty, 0);
+
+    const estFees = totals.total * Number(settings.feePercent || 0) + Number(settings.feeFixed || 0);
+    const fee = estFees;
+
+    const profit = totals.total - cogs - fee - shippingLabelCost;
+
+    return {
+      id: (opts.orderId || uid()),
+      createdAt: new Date().toISOString(),
+      status: "paid",
+      customer: {
+        name: $("c-name")?.value.trim(),
+        email: $("c-email")?.value.trim(),
+        phone: $("c-phone")?.value.trim(),
+        address1: $("c-address1")?.value.trim(),
+        address2: $("c-address2")?.value.trim(),
+        city: $("c-city")?.value.trim(),
+        state: $("c-state")?.value.trim(),
+        zip: $("c-zip")?.value.trim(),
+        country: $("c-country")?.value.trim()
+      },
+      shipping: {
+        methodId: shipSelect?.value,
+        charged: shippingCharged,
+        labelCost: shippingLabelCost
+      },
+      notes: $("order-notes")?.value.trim(),
+      items: items.map((it) => ({ id: it.id, name: it.name, price: it.price, cost: it.cost || 0, qty: it.qty })),
+      subtotal: totals.subtotal,
+      tax: totals.tax,
+      total: totals.total,
+      fees: fee,
+      cogs,
+      profit,
+      payment: {
+        provider: "square",
+        method: "cashapp",
+        squarePaymentId: squarePayment?.id || "",
+        squareStatus: squarePayment?.status || "",
+        receiptUrl: squarePayment?.receiptUrl || squarePayment?.receipt_url || ""
+      }
+    };
   }
 
   async function initPayPal() {
@@ -384,6 +633,9 @@
       return;
     }
 
+    let pendingOrderIdPayPal = null;
+    let pendingOrderIdVenmo = null;
+
     const btn = window.paypal.Buttons({
       style: { layout: "vertical", label: "paypal" },
 
@@ -405,7 +657,8 @@
         tick();
       },
 
-      createOrder: (data, actions) => {
+      
+      createOrder: async (data, actions) => {
         if (!reportValidationErrors()) {
           return Promise.reject(new Error("Form invalid"));
         }
@@ -413,56 +666,124 @@
         const shippingCharged = getShipPriceById(shipSelect?.value, settings);
         const totals = calcTotals(items, shippingCharged, settings.taxRate);
 
-        // IMPORTANT: In production, create/capture orders on your server to prevent tampering.
-        return actions.order.create({
-          intent: "CAPTURE",
-          application_context: {
-            brand_name: settings.paypalBrand || "Twin-Supply",
-            user_action: "PAY_NOW"
-          },
-          purchase_units: [
-            {
-              description: "Twin-Supply Order",
-              amount: {
-                currency_code: settings.currency || "USD",
-                value: totals.total.toFixed(2),
-                breakdown: {
-                  item_total: { currency_code: settings.currency || "USD", value: totals.subtotal.toFixed(2) },
-                  shipping: { currency_code: settings.currency || "USD", value: Number(shippingCharged || 0).toFixed(2) },
-                  tax_total: { currency_code: settings.currency || "USD", value: totals.tax.toFixed(2) }
-                }
-              }
-            }
-          ]
-        });
-      },
+        const apiBase = getApiBase();
+        const localOrderId = uid();
+        pendingOrderIdPayPal = localOrderId;
 
-      onApprove: async (data, actions) => {
-        if (ppStatus) ppStatus.textContent = "Processing payment...";
+        const payload = {
+          cart: items.map((it) => ({ id: it.id, qty: it.qty })),
+          shippingMethodId: shipSelect?.value || "standard",
+          expectedTotal: totals.total,
+          currency: settings.currency || "USD",
+          brandName: settings.paypalBrand || "Twin-Supply",
+          referenceId: localOrderId
+        };
+
         try {
-          const details = await actions.order.capture();
+          const resp = await fetch(`${apiBase}/api/paypal-create-order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
 
-          // Save order locally
-          const orders = getJSON(ORDERS_KEY, []);
-          const order = buildOrderDraft(details);
-          orders.unshift(order);
-          setJSON(ORDERS_KEY, orders);
-
-          // Optional: send to webhook so the admin can receive orders on a real database/sheet
-          sendOrderToWebhook(order);
-
-          // Update stock + clear cart
-          updateProductsStockAfterOrder(items);
-          setJSON(CART_KEY, []);
-
-          window.location.href = "success.html?orderId=" + encodeURIComponent(order.id);
+          const j = await resp.json().catch(() => ({}));
+          if (!resp.ok || !j.id) throw new Error(j.error || "Server create order failed");
+          return j.id;
         } catch (err) {
           console.error(err);
-          if (ppStatus) ppStatus.textContent = "Payment failed. Please try again.";
+
+          // Sandbox fallback (client-only) while setting up server env vars
+          if (String(settings.paypalMode || "").toLowerCase() === "sandbox") {
+            return actions.order.create({
+              intent: "CAPTURE",
+              application_context: {
+                brand_name: settings.paypalBrand || "Twin-Supply",
+                user_action: "PAY_NOW"
+              },
+              purchase_units: [
+                {
+                  description: "Twin-Supply Order",
+                  amount: {
+                    currency_code: settings.currency || "USD",
+                    value: totals.total.toFixed(2),
+                    breakdown: {
+                      item_total: { currency_code: settings.currency || "USD", value: totals.subtotal.toFixed(2) },
+                      shipping: { currency_code: settings.currency || "USD", value: Number(shippingCharged || 0).toFixed(2) },
+                      tax_total: { currency_code: settings.currency || "USD", value: totals.tax.toFixed(2) }
+                    }
+                  }
+                }
+              ]
+            });
+          }
+
+          if (ppStatus) ppStatus.textContent = "Server payments are not configured. Set PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET on Vercel.";
+          throw err;
         }
       },
 
-      onCancel: () => {
+      
+      
+          onApprove: async (data, actions) => {
+            if (ppStatus) ppStatus.textContent = "Processing payment...";
+
+            const shippingCharged = getShipPriceById(shipSelect?.value, settings);
+            const totals = calcTotals(items, shippingCharged, settings.taxRate);
+
+            const apiBase = getApiBase();
+            const localOrderId = pendingOrderIdPayPal || uid();
+
+            try {
+              let captureDetails = null;
+
+              try {
+                const resp = await fetch(`${apiBase}/api/paypal-capture-order`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    orderID: data.orderID,
+                    cart: items.map((it) => ({ id: it.id, qty: it.qty })),
+                    shippingMethodId: shipSelect?.value || "standard",
+                    expectedTotal: totals.total,
+                    customer: collectCustomer(),
+                    notes: $("order-notes")?.value.trim(),
+                    method: "paypal",
+                    localOrderId
+                  })
+                });
+
+                const j = await resp.json().catch(() => ({}));
+                if (!resp.ok || !j.capture) throw new Error(j.error || "Server capture failed");
+                captureDetails = j.capture;
+              } catch (serverErr) {
+                console.error(serverErr);
+                if (String(settings.paypalMode || "").toLowerCase() === "sandbox") {
+                  captureDetails = await actions.order.capture();
+                } else {
+                  throw serverErr;
+                }
+              }
+
+              const orders = getJSON(ORDERS_KEY, []);
+              const order = buildOrderDraft(captureDetails, { method: "paypal", orderId: localOrderId });
+              orders.unshift(order);
+              setJSON(ORDERS_KEY, orders);
+
+              sendOrderToWebhook(order);
+
+              updateProductsStockAfterOrder(items);
+              setJSON(CART_KEY, []);
+
+              pendingOrderIdPayPal = null;
+              window.location.href = "success.html?orderId=" + encodeURIComponent(order.id);
+            } catch (err) {
+              console.error(err);
+              if (ppStatus) ppStatus.textContent = "Payment failed. Please try again.";
+            }
+          },
+
+
+          onCancel: () => {
         if (ppStatus) ppStatus.textContent = "Payment cancelled.";
       },
 
@@ -474,7 +795,175 @@
 
     if (btn.isEligible()) btn.render("#paypal-buttons");
     else if (ppStatus) ppStatus.textContent = "PayPal is not eligible for this device/browser.";
+
+    // Standalone Venmo button (only shows when eligible; Venmo is not supported in sandbox)
+    try {
+      if (venmoWrap && venmoButtons && window.paypal?.FUNDING?.VENMO) {
+        const vbtn = window.paypal.Buttons({
+          fundingSource: window.paypal.FUNDING.VENMO,
+          style: { layout: "vertical", label: "venmo" },
+
+          onInit: (data, actions) => {
+            actions.disable();
+
+            const tick = () => {
+              if (isFormValid()) actions.enable();
+              else actions.disable();
+            };
+
+            ["input", "change", "keyup"].forEach((evt) => form?.addEventListener(evt, tick));
+            shipSelect?.addEventListener("change", tick);
+
+            tick();
+          },
+
+          
+          createOrder: async (data, actions) => {
+            if (!reportValidationErrors()) {
+              return Promise.reject(new Error("Form invalid"));
+            }
+
+            const shippingCharged = getShipPriceById(shipSelect?.value, settings);
+            const totals = calcTotals(items, shippingCharged, settings.taxRate);
+
+            const apiBase = getApiBase();
+            const localOrderId = uid();
+            pendingOrderIdVenmo = localOrderId;
+
+            const payload = {
+              cart: items.map((it) => ({ id: it.id, qty: it.qty })),
+              shippingMethodId: shipSelect?.value || "standard",
+              expectedTotal: totals.total,
+              currency: settings.currency || "USD",
+              brandName: settings.paypalBrand || "Twin-Supply",
+              referenceId: localOrderId
+            };
+
+            try {
+              const resp = await fetch(`${apiBase}/api/paypal-create-order`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+              });
+
+              const j = await resp.json().catch(() => ({}));
+              if (!resp.ok || !j.id) throw new Error(j.error || "Server create order failed");
+              return j.id;
+            } catch (err) {
+              console.error(err);
+
+              if (String(settings.paypalMode || "").toLowerCase() === "sandbox") {
+                return actions.order.create({
+                  intent: "CAPTURE",
+                  application_context: {
+                    brand_name: settings.paypalBrand || "Twin-Supply",
+                    user_action: "PAY_NOW"
+                  },
+                  purchase_units: [
+                    {
+                      description: "Twin-Supply Order",
+                      amount: {
+                        currency_code: settings.currency || "USD",
+                        value: totals.total.toFixed(2),
+                        breakdown: {
+                          item_total: { currency_code: settings.currency || "USD", value: totals.subtotal.toFixed(2) },
+                          shipping: { currency_code: settings.currency || "USD", value: Number(shippingCharged || 0).toFixed(2) },
+                          tax_total: { currency_code: settings.currency || "USD", value: totals.tax.toFixed(2) }
+                        }
+                      }
+                    }
+                  ]
+                });
+              }
+
+              if (ppStatus) ppStatus.textContent = "Server payments are not configured. Set PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET on Vercel.";
+              throw err;
+            }
+          },
+
+
+          onApprove: async (data, actions) => {
+            if (ppStatus) ppStatus.textContent = "Processing payment...";
+
+            const shippingCharged = getShipPriceById(shipSelect?.value, settings);
+            const totals = calcTotals(items, shippingCharged, settings.taxRate);
+
+            const apiBase = getApiBase();
+            const localOrderId = pendingOrderIdVenmo || uid();
+
+            try {
+              let captureDetails = null;
+
+              try {
+                const resp = await fetch(`${apiBase}/api/paypal-capture-order`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    orderID: data.orderID,
+                    cart: items.map((it) => ({ id: it.id, qty: it.qty })),
+                    shippingMethodId: shipSelect?.value || "standard",
+                    expectedTotal: totals.total,
+                    customer: collectCustomer(),
+                    notes: $("order-notes")?.value.trim(),
+                    method: "venmo",
+                    localOrderId
+                  })
+                });
+
+                const j = await resp.json().catch(() => ({}));
+                if (!resp.ok || !j.capture) throw new Error(j.error || "Server capture failed");
+                captureDetails = j.capture;
+              } catch (serverErr) {
+                console.error(serverErr);
+                // Sandbox fallback
+                if (String(settings.paypalMode || "").toLowerCase() === "sandbox") {
+                  captureDetails = await actions.order.capture();
+                } else {
+                  throw serverErr;
+                }
+              }
+
+              const orders = getJSON(ORDERS_KEY, []);
+              const order = buildOrderDraft(captureDetails, { method: "venmo", orderId: localOrderId });
+              orders.unshift(order);
+              setJSON(ORDERS_KEY, orders);
+
+              sendOrderToWebhook(order);
+
+              updateProductsStockAfterOrder(items);
+              setJSON(CART_KEY, []);
+
+              pendingOrderIdVenmo = null;
+              window.location.href = "success.html?orderId=" + encodeURIComponent(order.id);
+            } catch (err) {
+              console.error(err);
+              if (ppStatus) ppStatus.textContent = "Payment failed. Please try again.";
+            }
+          },
+
+          onCancel: () => {
+            if (ppStatus) ppStatus.textContent = "Payment cancelled.";
+          },
+
+          onError: (err) => {
+            console.error(err);
+            if (ppStatus) ppStatus.textContent = "Payment failed. Please try again.";
+          }
+        });
+
+        if (vbtn.isEligible()) {
+          venmoWrap.style.display = "block";
+          vbtn.render("#venmo-buttons");
+        } else {
+          venmoWrap.style.display = "none";
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      if (venmoWrap) venmoWrap.style.display = "none";
+    }
   }
 
   initPayPal();
+  initCashAppPay();
 })();

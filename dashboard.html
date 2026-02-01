@@ -231,6 +231,33 @@
             </div>
           </div>
 
+          <div class="kicker" style="margin-top:14px">Cash App Pay (Square) (optional)</div>
+          <div class="field">
+            <label>Square Application ID</label>
+            <input id="square-app-id" placeholder="Sandbox/Production Application ID"/>
+          </div>
+          <div class="field">
+            <label>Square Location ID</label>
+            <input id="square-location-id" placeholder="Your Square Location ID"/>
+          </div>
+          <div class="inlineRow">
+            <div class="field" style="flex:1">
+              <label>Square environment</label>
+              <select id="square-env">
+                <option value="sandbox">Sandbox (testing)</option>
+                <option value="live">Live</option>
+              </select>
+            </div>
+            <div class="field" style="flex:1">
+              <label>Square API base URL (Vercel)</label>
+              <input id="square-api-base" placeholder="https://twin-supply.vercel.app"/>
+            </div>
+          </div>
+          <div class="kicker" style="color:var(--muted);margin-top:8px">
+            Cash App Pay uses the Square Web Payments SDK + a serverless API. Add your Square access token in Vercel env vars as <b>SQUARE_ACCESS_TOKEN</b>.
+          </div>
+
+
           <div class="kicker" style="margin-top:14px">Order notifications (optional)</div>
           <div class="field">
             <label>Order webhook URL (example: Google Apps Script Web App URL)</label>

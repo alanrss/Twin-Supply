@@ -79,7 +79,11 @@
         { id: "standard", name: "Standard", price: 7.99 },
         { id: "express", name: "Express", price: 14.99 },
         { id: "pickup", name: "Pickup", price: 0 }
-      ]
+      ],
+      squareAppId: "",
+      squareLocationId: "",
+      squareEnv: "sandbox",
+      squareApiBaseUrl: "https://twin-supply.vercel.app"
     };
 
     const s = getJSON(SETTINGS_KEY, def);
@@ -94,6 +98,10 @@
     if (typeof s.paypalBrand !== "string") s.paypalBrand = String(s.paypalBrand || "Twin-Supply");
     if (typeof s.orderWebhookUrl !== "string") s.orderWebhookUrl = String(s.orderWebhookUrl || "");
     if (typeof s.orderWebhookToken !== "string") s.orderWebhookToken = String(s.orderWebhookToken || "");
+    if (typeof s.squareAppId !== "string") s.squareAppId = String(s.squareAppId || "");
+    if (typeof s.squareLocationId !== "string") s.squareLocationId = String(s.squareLocationId || "");
+    if (String(s.squareEnv || "").toLowerCase() !== "live") s.squareEnv = "sandbox";
+    if (typeof s.squareApiBaseUrl !== "string") s.squareApiBaseUrl = String(s.squareApiBaseUrl || "https://twin-supply.vercel.app");
 
     if (!Array.isArray(s.shippingMethods) || !s.shippingMethods.length) {
       s.shippingMethods = def.shippingMethods;
@@ -396,6 +404,10 @@
     if ($("paypal-client-id")) $("paypal-client-id").value = String(settings.paypalClientId || "");
     if ($("paypal-mode")) $("paypal-mode").value = String(settings.paypalMode || "sandbox");
     if ($("paypal-brand")) $("paypal-brand").value = String(settings.paypalBrand || "Twin-Supply");
+    if ($("square-app-id")) $("square-app-id").value = String(settings.squareAppId || "");
+    if ($("square-location-id")) $("square-location-id").value = String(settings.squareLocationId || "");
+    if ($("square-env")) $("square-env").value = String(settings.squareEnv || "sandbox");
+    if ($("square-api-base")) $("square-api-base").value = String(settings.squareApiBaseUrl || "https://twin-supply.vercel.app");
     if ($("order-webhook-url")) $("order-webhook-url").value = String(settings.orderWebhookUrl || "");
     if ($("order-webhook-token")) $("order-webhook-token").value = String(settings.orderWebhookToken || "");
   }
@@ -411,6 +423,11 @@
     settings.paypalBrand = String($("paypal-brand")?.value || "Twin-Supply").trim() || "Twin-Supply";
     settings.orderWebhookUrl = String($("order-webhook-url")?.value || "").trim();
     settings.orderWebhookToken = String($("order-webhook-token")?.value || "").trim();
+    settings.squareAppId = String($("square-app-id")?.value || "").trim();
+    settings.squareLocationId = String($("square-location-id")?.value || "").trim();
+    settings.squareEnv = (String($("square-env")?.value || "sandbox").toLowerCase() === "live") ? "live" : "sandbox";
+    settings.squareApiBaseUrl = String($("square-api-base")?.value || "https://twin-supply.vercel.app").trim() || "https://twin-supply.vercel.app";
+
 
     const shipStandard = Number($("ship-standard").value || 0);
     const shipExpress = Number($("ship-express").value || 0);
