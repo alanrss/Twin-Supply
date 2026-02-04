@@ -47,8 +47,9 @@ module.exports = async (req, res) => {
 
   function getTaxRate() {
     const r = Number(process.env.TAX_RATE || 0);
-    if (!Number.isFinite(r)) return 0;
-    // TAX_RATE is stored as a percentage in Dashboard (e.g. 7.5 for 7.5%).
+    if (!Number.isFinite(r) || r <= 0) return 0;
+    // Accept TAX_RATE as either a percent (e.g. 7.5) or a decimal (e.g. 0.075)
+    if (r > 0 && r <= 1) return r;
     return Math.min(Math.max(r, 0), 100) / 100;
   }
 

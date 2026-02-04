@@ -511,7 +511,7 @@ function money(n, currency) {
           locationId: settings.squareLocationId || "",
           cart: items.map((it) => ({ id: it.id, qty: it.qty })),
           shippingMethodId: shipSelect?.value || "standard",
-          expectedTotal: totals2.total,
+
           customer: collectCustomer(),
           notes: $("order-notes")?.value.trim(),
           localOrderId
@@ -673,7 +673,7 @@ function money(n, currency) {
         const payload = {
           cart: items.map((it) => ({ id: it.id, qty: it.qty })),
           shippingMethodId: shipSelect?.value || "standard",
-          expectedTotal: totals.total,
+
           currency: settings.currency || "USD",
           brandName: settings.paypalBrand || "Twin-Supply",
           referenceId: localOrderId
@@ -744,7 +744,7 @@ function money(n, currency) {
                     orderID: data.orderID,
                     cart: items.map((it) => ({ id: it.id, qty: it.qty })),
                     shippingMethodId: shipSelect?.value || "standard",
-                    expectedTotal: totals.total,
+
                     customer: collectCustomer(),
                     notes: $("order-notes")?.value.trim(),
                     method: "paypal",
@@ -796,12 +796,12 @@ function money(n, currency) {
     if (btn.isEligible()) btn.render("#paypal-buttons");
     else if (ppStatus) ppStatus.textContent = "PayPal is not eligible for this device/browser.";
 
-    // Standalone Venmo button (only shows when eligible; Venmo is not supported in sandbox)
+    // Standalone Venmo button (only shows when eligible; in sandbox eligibility varies by device/country)
     try {
       if (venmoWrap && venmoButtons && window.paypal?.FUNDING?.VENMO) {
         const vbtn = window.paypal.Buttons({
           fundingSource: window.paypal.FUNDING.VENMO,
-          style: { layout: "vertical", label: "venmo" },
+          style: { layout: "vertical" },
 
           onInit: (data, actions) => {
             actions.disable();
@@ -833,7 +833,7 @@ function money(n, currency) {
             const payload = {
               cart: items.map((it) => ({ id: it.id, qty: it.qty })),
               shippingMethodId: shipSelect?.value || "standard",
-              expectedTotal: totals.total,
+
               currency: settings.currency || "USD",
               brandName: settings.paypalBrand || "Twin-Supply",
               referenceId: localOrderId
@@ -902,7 +902,7 @@ function money(n, currency) {
                     orderID: data.orderID,
                     cart: items.map((it) => ({ id: it.id, qty: it.qty })),
                     shippingMethodId: shipSelect?.value || "standard",
-                    expectedTotal: totals.total,
+
                     customer: collectCustomer(),
                     notes: $("order-notes")?.value.trim(),
                     method: "venmo",
@@ -953,7 +953,7 @@ function money(n, currency) {
 
         if (vbtn.isEligible()) {
           venmoWrap.style.display = "block";
-          vbtn.render("#venmo-buttons");
+          vbtn.render("#venmo-buttons").catch((err) => console.warn("Venmo render failed", err));
         } else {
           venmoWrap.style.display = "none";
         }
